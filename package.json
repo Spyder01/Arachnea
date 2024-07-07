@@ -1,0 +1,17 @@
+{
+  "name": "list",
+  "version": "0.0.1",
+  "description": "A simple api to perform array operations in a single loop",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts",
+    "build": "tsc "
+  },
+  "author": "Suhan",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}

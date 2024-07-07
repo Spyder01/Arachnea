@@ -129,6 +129,69 @@ describe('Testing stream', () => {
     expect(result).toEqual(7);
   });
 
+  // Remove operation tests
+  it("should remove the first occurrence of 2 from the array.", () => {
+    const result = stream(arr).remove(2).collect();
+
+    expect(result).toEqual([1, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first occurrence of 1 from the array using a predicate function.", () => {
+    const result = stream(arr).remove(ele => ele === 1).collect();
+
+    expect(result).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first odd number from the array.", () => {
+    const result = stream(arr).remove(ele => ele % 2 !== 0).collect();
+
+    expect(result).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first even number from the array.", () => {
+    const result = stream(arr).remove(ele => ele % 2 === 0).collect();
+
+    expect(result).toEqual([1, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first number greater than 5 from the array.", () => {
+    const result = stream(arr).remove(ele => ele > 5).collect();
+
+    expect(result).toEqual([1, 2, 3, 4, 5, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first element, then filter out numbers less than 5.", () => {
+    const result = stream(arr)
+      .remove(ele => true) // Removes the first element
+      .filter(ele => ele >= 5)
+      .collect();
+
+    expect(result).toEqual([5, 6, 7, 8, 9, 10]);
+  });
+
+  it("should remove the first occurrence of a number, then double the remaining elements and sum them up.", () => {
+    const result = stream(arr)
+      .remove(ele => ele === 4)
+      .map(ele => ele * 2)
+      .reduce((acc, ele) => acc + ele, 0);
+
+    expect(result).toEqual([1, 2, 3, 5, 6, 7, 8, 9, 10]
+      .map(ele => ele * 2)
+      .reduce((acc, ele) => acc + ele, 0)
+    );
+  });
+
+  it("should remove the first element that matches a predicate and then return the remaining elements as strings.", () => {
+    const result = stream(arr)
+      .remove(ele => ele > 8)
+      .map(ele => ele.toString())
+      .collect();
+
+    expect(result).toEqual(arr
+      .filter(ele => ele !== 9)
+      .map(ele => ele.toString())
+    );
+  });
 });
 
 describe('Benchmarking stream API vs. Array HOFs', () => {

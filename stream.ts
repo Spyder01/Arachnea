@@ -1,6 +1,7 @@
 enum ActionType {
   MAP,
   FILTER,
+  REMOVE,
   REDUCE,
   FIND,
   COLLECT,
@@ -10,7 +11,7 @@ export type ArrayTransformer<T, K> = (ele: T) => K;
 
 export type ReduceTransformer<T, K> = (accumilator: K, currentValue: T) => K;
 
-export type FindCondition<T> = ((ele: T) => boolean) | T;
+export type Condition<T> = ((ele: T) => boolean) | T;
 
 type StreamInterrupt = {
   interrupted: boolean;
@@ -21,9 +22,17 @@ type Action<T, K> = {
   transformer: ArrayTransformer<T, K>,
 }
 
+const conditionToArrayTransformer = <T>(condition: Condition<T>): ArrayTransformer<T, boolean> => {
+  if (typeof condition === 'function') {
+    return condition as ArrayTransformer<T, boolean>;
+  }
+
+  return (ele: T) => ele === condition;
+}
+
 class Stream<T> {
   private list: Array<T>;
-  private actionStack: Array<Action<T, unknown | boolean>>;
+  private actionStack: Array<Action<T, unknown | boolean> | null>;
 
   constructor(list: Array<T>) {
     this.list = list;
@@ -48,6 +57,17 @@ class Stream<T> {
     return this;
   }
 
+  public remove(condition: Condition<T>) {
+    const transformer = conditionToArrayTransformer(condition);
+
+    this.actionStack.push({
+      type: ActionType.REMOVE,
+      transformer,
+    });
+
+    return this;
+  }
+
   public actionLoop<R>(operation: (ele: T) => void, interupt: StreamInterrupt = { interrupted: false }) {
     let index = 0;
     let exclude = false;
@@ -60,14 +80,28 @@ class Stream<T> {
       let ele: any = this.list[index];
       exclude = false;
 
-      for (const action of this.actionStack) {
+      for (let i = 0; i < this.actionStack.length; i++) {
+        if (!this.actionStack[i]) {
+          continue;
+        }
+
+        const action = this.actionStack[i]!;
+
         switch (action.type) {
           case ActionType.MAP:
             ele = (action.transformer as ArrayTransformer<T, unknown>)(ele);
             break;
 
           case ActionType.FILTER:
-            exclude = !(action.transformer as ArrayTransformer<T, boolean>)(ele)
+            exclude = !(action.transformer as ArrayTransformer<T, boolean>)(ele);
+            break;
+
+          case ActionType.REMOVE:
+            exclude = (action.transformer as ArrayTransformer<T, boolean>)(ele);
+
+            if (exclude) {
+              this.actionStack[i] = null;
+            }
             break;
         }
 
@@ -98,19 +132,12 @@ class Stream<T> {
     return accumulator;
   }
 
-  public find(condition: FindCondition<T>): T | undefined {
-    let condition_: (ele: T) => boolean;
+  public find(condition: Condition<T>): T | undefined {
+    const condition_ = conditionToArrayTransformer(condition);
     let result: T | undefined;
 
     let interrupt: StreamInterrupt = {
       interrupted: false,
-    }
-
-    if (typeof condition === 'function') {
-      condition_ = condition as (ele: T) => boolean;
-    }
-    else {
-      condition_ = (ele: T) => (condition as T) === ele;
     }
 
     this.actionLoop(ele => {

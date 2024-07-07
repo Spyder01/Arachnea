@@ -2,11 +2,19 @@ enum ActionType {
   MAP,
   FILTER,
   REDUCE,
+  FIND,
+  COLLECT,
 }
 
 export type ArrayTransformer<T, K> = (ele: T) => K;
 
 export type ReduceTransformer<T, K> = (accumilator: K, currentValue: T) => K;
+
+export type FindCondition<T> = ((ele: T) => boolean) | T;
+
+type StreamInterrupt = {
+  interrupted: boolean;
+}
 
 type Action<T, K> = {
   type: ActionType,
@@ -40,14 +48,15 @@ class Stream<T> {
     return this;
   }
 
-  private collectOrReduce<R>(transformer: ReduceTransformer<T, R> | null = null, currentValue: R | null = null): Array<R> | R {
-    let accumilator = currentValue;
-
+  public actionLoop<R>(operation: (ele: T) => void, interupt: StreamInterrupt = { interrupted: false }) {
     let index = 0;
-    let result: Array<R> = [];
     let exclude = false;
 
     while (index < this.list.length) {
+      if (interupt.interrupted) {
+        break;
+      }
+
       let ele: any = this.list[index];
       exclude = false;
 
@@ -68,33 +77,60 @@ class Stream<T> {
       }
 
       if (!exclude) {
-
-        if (!transformer) {
-          result.push(ele as R);
-        }
-
-        if (transformer) {
-          accumilator = transformer(accumilator!, ele)
-        }
+        operation(ele);
       }
 
       index++;
     }
-
-    return transformer ? accumilator! : result;
   }
 
   public reduce<K>(transformer: ReduceTransformer<T, K>, initialValue: K) {
-
     if (this.actionStack.length === 0) {
       return this.list.reduce(transformer, initialValue)
     }
 
-    return this.collectOrReduce(transformer, initialValue) as K;
+    let accumulator: K = initialValue;
+
+    this.actionLoop(ele => {
+      accumulator = transformer(accumulator, ele);
+    });
+
+    return accumulator;
+  }
+
+  public find(condition: FindCondition<T>): T | undefined {
+    let condition_: (ele: T) => boolean;
+    let result: T | undefined;
+
+    let interrupt: StreamInterrupt = {
+      interrupted: false,
+    }
+
+    if (typeof condition === 'function') {
+      condition_ = condition as (ele: T) => boolean;
+    }
+    else {
+      condition_ = (ele: T) => (condition as T) === ele;
+    }
+
+    this.actionLoop(ele => {
+      if (condition_(ele)) {
+        result = ele;
+        interrupt.interrupted = true;
+      }
+    }, interrupt);
+
+    return result;
   }
 
   public collect(): Array<T> {
-    return this.collectOrReduce<T>() as Array<T>
+    let result: Array<T> = [];
+
+    this.actionLoop(ele => {
+      result.push(ele);
+    })
+
+    return result;
   }
 }
 

@@ -97,6 +97,38 @@ describe('Testing stream', () => {
       .map(ele => ele.toString())
     );
   });
+
+  it("find the element in an array which is greater than 80 after we remove the even numbers and square the remaining elements of the array", () => {
+    const result = stream(arr)
+      .filter(ele => ele % 2 !== 0)
+      .map(ele => ele * ele)
+      .find(ele => ele > 80)
+
+    expect(result).toEqual(81)
+  });
+
+  // Additional tests for find
+  it("should find the first element greater than 5", () => {
+    const result = stream(arr)
+      .find(ele => ele > 5);
+
+    expect(result).toEqual(6);
+  });
+
+  it("should find the first even number", () => {
+    const result = stream(arr)
+      .find(ele => ele % 2 === 0);
+
+    expect(result).toEqual(2);
+  });
+
+  it("should find the first element that matches a direct comparison", () => {
+    const result = stream(arr)
+      .find(7);
+
+    expect(result).toEqual(7);
+  });
+
 });
 
 describe('Benchmarking stream API vs. Array HOFs', () => {
@@ -146,7 +178,6 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
     console.log(`Chaining operations (map, filter) in stream API took ${durationStream.toFixed(3)} milliseconds`);
     console.log(`Chaining operations (map, filter) in Array HOFs took ${durationArray.toFixed(3)} milliseconds`);
 
-    // Note: No direct comparison as the results are arrays, not reduced to a single value
     expect(durationStream).toBeLessThan(durationArray);
   });
 
@@ -170,6 +201,78 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
     console.log(`Chaining operations (filter, map) in Array HOFs took ${durationArray.toFixed(3)} milliseconds`);
 
     expect(durationStream).toBeLessThan(durationArray);
+  });
+
+  // Benchmarking tests for find chaining
+  it("should benchmark chaining operations in stream API vs Array HOFs - map, find", () => {
+    const startStream = performanceNow();
+    const streamResult = stream(arr)
+      .map(num => num * 2)
+      .find(num => num > 1000000);
+    const endStream = performanceNow();
+
+    const startArray = performanceNow();
+    const arrayResult = arr
+      .map(num => num * 2)
+      .find(num => num > 1000000);
+    const endArray = performanceNow();
+
+    const durationStream = endStream - startStream;
+    const durationArray = endArray - startArray;
+
+    console.log(`Chaining operations (map, find) in stream API took ${durationStream.toFixed(3)} milliseconds`);
+    console.log(`Chaining operations (map, find) in Array HOFs took ${durationArray.toFixed(3)} milliseconds`);
+
+    expect(durationStream).toBeLessThan(durationArray);
+    expect(streamResult).toEqual(arrayResult); // Ensure results are identical
+  });
+
+  it("should benchmark chaining operations in stream API vs Array HOFs - filter, find", () => {
+    const startStream = performanceNow();
+    const streamResult = stream(arr)
+      .filter(num => num % 2 === 0)
+      .find(num => num > 500000);
+    const endStream = performanceNow();
+
+    const startArray = performanceNow();
+    const arrayResult = arr
+      .filter(num => num % 2 === 0)
+      .find(num => num > 500000);
+    const endArray = performanceNow();
+
+    const durationStream = endStream - startStream;
+    const durationArray = endArray - startArray;
+
+    console.log(`Chaining operations (filter, find) in stream API took ${durationStream.toFixed(3)} milliseconds`);
+    console.log(`Chaining operations (filter, find) in Array HOFs took ${durationArray.toFixed(3)} milliseconds`);
+
+    expect(durationStream).toBeLessThan(durationArray);
+    expect(streamResult).toEqual(arrayResult); // Ensure results are identical
+  });
+
+  it("should benchmark chaining operations in stream API vs Array HOFs - map, filter, find", () => {
+    const startStream = performanceNow();
+    const streamResult = stream(arr)
+      .map(num => num * 2)
+      .filter(num => num % 3 === 0)
+      .find(num => num > 1000000);
+    const endStream = performanceNow();
+
+    const startArray = performanceNow();
+    const arrayResult = arr
+      .map(num => num * 2)
+      .filter(num => num % 3 === 0)
+      .find(num => num > 1000000);
+    const endArray = performanceNow();
+
+    const durationStream = endStream - startStream;
+    const durationArray = endArray - startArray;
+
+    console.log(`Chaining operations (map, filter, find) in stream API took ${durationStream.toFixed(3)} milliseconds`);
+    console.log(`Chaining operations (map, filter, find) in Array HOFs took ${durationArray.toFixed(3)} milliseconds`);
+
+    expect(durationStream).toBeLessThan(durationArray);
+    expect(streamResult).toEqual(arrayResult); // Ensure results are identical
   });
 
 });

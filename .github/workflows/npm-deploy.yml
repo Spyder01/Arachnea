@@ -30,7 +30,8 @@ jobs:
     needs: test
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -41,10 +42,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build and publish package
+      - name: Build package
+        run: npm run build
+
+      - name: Prepare package for publish
         run: |
-          npm run build 
-          npm ci 
-          npm publish
+          mkdir publish
+          cp -r dist package.json README.md LICENSE publish/
+
+      - name: Publish to npm
+        run: cd publish && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

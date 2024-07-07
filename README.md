@@ -7,6 +7,7 @@ arachnea is a JavaScript library that allows you to perform efficient array oper
 - **Map**: Transform each element of an array using a provided function.
 - **Filter**: Filter elements of an array based on a provided condition.
 - **Reduce**: Reduce an array to a single value based on a provided accumulator and transformation function.
+- **Find**: Find the first element in the array that meets the given condition.
 
 ## Installation
 
@@ -60,6 +61,16 @@ const oddNumbers = arachnea(numbers)
 console.log(oddNumbers); // Output: [1, 3, 5]
 ```
 
+#### Mapping and finding
+
+```js
+const greaterThanTwentyFour = arachnea(numbers)
+  .map((num) => num * num)
+  .find((num) => num > 24);
+
+console.log(greaterThanTwentyFour); // 24
+```
+
 #### Chaining Operations
 
 ```js
@@ -85,6 +96,10 @@ Filters elements of the array based on the provided boolean transformer function
 
 Reduces the array to a single value using the provided reducer function and initial value.
 
+### `find(condition:  ((ele: T) => boolean) | T): T`
+
+Finds the first element that meets the given condition or is equal to the given parameter.
+
 ### `collect(): Array<T>`
 
 Collects the elements after applying all transformations and filters, returning them as an array.
@@ -96,8 +111,9 @@ For more examples and advanced usage, refer to the examples directory.
 ## Todo
 
 - Combine successive filter operations into a single operation.
+- Document `actionsLoop` for custom terminating operation       injection.
 - Improve the performance of atomic operations.
-- Add sorting functionality
+- Add sorting, remove and flattening functionality.
 - Enhance performance optimizations.
 - Implement error handling for edge cases.
 

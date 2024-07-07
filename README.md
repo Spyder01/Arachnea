@@ -43,7 +43,7 @@ console.log(result); // Output: [6]
 #### Mapping and Reducing
 
 ```js
-const sumOfSquares = stream(numbers)
+const sumOfSquares = arachnea(numbers)
   .map((num) => num * num)
   .reduce((acc, num) => acc + num, 0);
 
@@ -53,7 +53,7 @@ console.log(sumOfSquares); // Output: 55
 #### Filtering and collecting
 
 ```js
-const oddNumbers = stream(numbers)
+const oddNumbers = arachnea(numbers)
   .filter((num) => num % 2 !== 0)
   .collect();
 
@@ -63,7 +63,7 @@ console.log(oddNumbers); // Output: [1, 3, 5]
 #### Chaining Operations
 
 ```js
-const result = stream(numbers)
+const result = arachnea(numbers)
   .filter((num) => num > 2)
   .map((num) => num * 3)
   .reduce((acc, num) => acc + num, 0);

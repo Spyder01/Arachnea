@@ -2,6 +2,7 @@ enum ActionType {
   MAP,
   FILTER,
   REMOVE,
+  FOREACH,
   REDUCE,
   FIND,
   COLLECT,
@@ -48,6 +49,15 @@ class Stream<T> {
     return this as unknown as Stream<K>;
   }
 
+  public forEach(transformer: ArrayTransformer<T, void>) {
+    this.actionStack.push({
+      type: ActionType.FOREACH,
+      transformer: transformer,
+    });
+
+    return this
+  }
+
   public filter(transformer: ArrayTransformer<T, boolean>) {
     this.actionStack.push({
       type: ActionType.FILTER,
@@ -90,6 +100,10 @@ class Stream<T> {
         switch (action.type) {
           case ActionType.MAP:
             ele = (action.transformer as ArrayTransformer<T, unknown>)(ele);
+            break;
+
+          case ActionType.FOREACH:
+            (action.transformer as ArrayTransformer<T, void>)(ele);
             break;
 
           case ActionType.FILTER:

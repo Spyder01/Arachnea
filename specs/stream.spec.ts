@@ -87,6 +87,15 @@ describe('Testing stream', () => {
     );
   });
 
+  it("should sum up the numbers.", () => {
+    let sum = 0;
+    stream(arr)
+      .forEach(ele => { sum += ele; })
+      .collect();
+
+    expect(sum).toEqual(55);
+  });
+
   it("should filter out numbers less than 6 and return an array of the remaining elements as strings", () => {
     const result = stream(arr)
       .filter(ele => ele >= 6)
@@ -198,19 +207,19 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
   const arr = Array.from({ length: 1000000 }, (_, index) => index + 1); // Example large array
 
   it("should benchmark chaining operations in stream API vs Array HOFs - map, filter, reduce", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .filter(num => num % 2 === 0)
       .map(num => num * 2)
       .reduce((acc, num) => acc + num, 0);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .filter(num => num % 2 === 0)
       .map(num => num * 2)
       .reduce((acc, num) => acc + num, 0);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -223,17 +232,17 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
   });
 
   it("should benchmark chaining operations in stream API vs Array HOFs - map, filter", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .filter(num => num % 3 === 0)
       .map(num => num * 3);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .filter(num => num % 3 === 0)
       .map(num => num * 3);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -245,17 +254,17 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
   });
 
   it("should benchmark chaining operations in stream API vs Array HOFs - filter, map", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .filter(num => num > 500000)
       .map(num => num / 2);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .filter(num => num > 500000)
       .map(num => num / 2);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -268,17 +277,17 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
 
   // Benchmarking tests for find chaining
   it("should benchmark chaining operations in stream API vs Array HOFs - map, find", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .map(num => num * 2)
       .find(num => num > 1000000);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .map(num => num * 2)
       .find(num => num > 1000000);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -291,17 +300,17 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
   });
 
   it("should benchmark chaining operations in stream API vs Array HOFs - filter, find", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .filter(num => num % 2 === 0)
       .find(num => num > 500000);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .filter(num => num % 2 === 0)
       .find(num => num > 500000);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -314,19 +323,19 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
   });
 
   it("should benchmark chaining operations in stream API vs Array HOFs - map, filter, find", () => {
-    const startStream = performanceNow();
+    const startStream = performance.now();
     const streamResult = stream(arr)
       .map(num => num * 2)
       .filter(num => num % 3 === 0)
       .find(num => num > 1000000);
-    const endStream = performanceNow();
+    const endStream = performance.now();
 
-    const startArray = performanceNow();
+    const startArray = performance.now();
     const arrayResult = arr
       .map(num => num * 2)
       .filter(num => num % 3 === 0)
       .find(num => num > 1000000);
-    const endArray = performanceNow();
+    const endArray = performance.now();
 
     const durationStream = endStream - startStream;
     const durationArray = endArray - startArray;
@@ -336,6 +345,34 @@ describe('Benchmarking stream API vs. Array HOFs', () => {
 
     expect(durationStream).toBeLessThan(durationArray);
     expect(streamResult).toEqual(arrayResult); // Ensure results are identical
+  });
+
+  // Benchmarking forEach operation
+  it("should benchmark forEach operation in stream API vs Array forEach", () => {
+    // For stream API
+    const startStream = performance.now();
+    let sumStream = 0;
+    stream(arr).forEach(num => {
+      sumStream += num * 2;
+    }).collect();
+    const endStream = performance.now();
+
+    // For Array forEach
+    const startArray = performance.now();
+    let sumArray = 0;
+    arr.forEach(num => {
+      sumArray += num * 2;
+    });
+    const endArray = performance.now();
+
+    const durationStream = endStream - startStream;
+    const durationArray = endArray - startArray;
+
+    console.log(`forEach operation in stream API took ${durationStream.toFixed(3)} milliseconds`);
+    console.log(`forEach operation in Array forEach took ${durationArray.toFixed(3)} milliseconds`);
+
+    expect(durationArray).toBeLessThan(durationStream);
+    expect(sumStream).toEqual(sumArray); // Ensure results are identical
   });
 
 });

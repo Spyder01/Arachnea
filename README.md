@@ -9,6 +9,7 @@ arachnea is a JavaScript library that allows you to perform efficient array oper
 - **Reduce**: Reduce an array to a single value based on a provided accumulator and transformation function.
 - **Find**: Find the first element in the array that meets the given condition.
 - **Remove**: Remove the first element in the array that meets the given condition.
+- **ForEach**: Execute a provided function once for each array element.
 
 ## Installation
 
@@ -20,7 +21,6 @@ npm install arachnea
 # or yarn
 
 yarn add arachnea
-
 ```
 
 ## Usage
@@ -32,12 +32,9 @@ import arachnea from "arachnea";
 
 const numbers = [1, 2, 3, 4, 5];
 
-const result = arachnea(numbers)
-  .map((num) => num * 2)
-  .filter((num) => num % 3 === 0)
-  .collect();
-
-console.log(result); // Output: [6]
+arachnea(numbers).forEach((num) => {
+  console.log(num * 2); // Example of using forEach
+});
 ```
 
 ### API Examples
@@ -52,7 +49,7 @@ const sumOfSquares = arachnea(numbers)
 console.log(sumOfSquares); // Output: 55
 ```
 
-#### Filtering and collecting
+#### Filtering and Collecting
 
 ```js
 const oddNumbers = arachnea(numbers)
@@ -62,23 +59,25 @@ const oddNumbers = arachnea(numbers)
 console.log(oddNumbers); // Output: [1, 3, 5]
 ```
 
+#### Removing Elements
+
 ```js
 const remove4 = arachnea(numbers)
   .map((num) => num * num)
   .remove(4)
   .collect();
 
-console.log(remove4); // OutputL [1, 9, 16, 25]
+console.log(remove4); // Output: [1, 9, 16, 25]
 ```
 
-#### Mapping and finding
+#### Finding Elements
 
 ```js
 const greaterThanTwentyFour = arachnea(numbers)
   .map((num) => num * num)
   .find((num) => num > 24);
 
-console.log(greaterThanTwentyFour); // 24
+console.log(greaterThanTwentyFour); // Output: 25
 ```
 
 #### Chaining Operations
@@ -94,25 +93,29 @@ console.log(result); // Output: 39
 
 ## API
 
-### `map(transformer: ArrayTransformer<T, K>): Stream<K>`
+### `map(transformer: (element: T) => K): Stream<K>`
 
 Transforms each element of the array using the provided transformer function.
 
-### `filter(transformer: ArrayTransformer<T, boolean>): Stream<T>`
+### `filter(condition: (element: T) => boolean): Stream<T>`
 
-Filters elements of the array based on the provided boolean transformer function.
+Filters elements of the array based on the provided boolean condition function.
 
-### `reduce(transformer: ReduceTransformer<T, K>, initialValue: K): K`
+### `reduce(reducer: (accumulator: K, element: T) => K, initialValue: K): K`
 
 Reduces the array to a single value using the provided reducer function and initial value.
 
-### `remove(condition:  ((ele: T) => boolean) | T): T`
+### `remove(condition: (element: T) => boolean | T): Stream<T>`
 
-Removes the first element that meets the given condition or is equal to the given parameter.
+Removes the first element in the array that meets the given condition or is equal to the given parameter.
 
-### `find(condition:  ((ele: T) => boolean) | T): T`
+### `find(condition: (element: T) => boolean | T): T`
 
-Finds the first element that meets the given condition or is equal to the given parameter.
+Finds the first element in the array that meets the given condition or is equal to the given parameter.
+
+### `forEach(action: (element: T) => void): void`
+
+Executes a provided function once for each array element.
 
 ### `collect(): Array<T>`
 
@@ -123,10 +126,10 @@ Collects the elements after applying all transformations and filters, returning 
 - Combine successive filter operations into a single operation.
 - Document `actionsLoop` for custom terminating operation injection.
 - Improve the performance of atomic operations.
-- Add sorting, remove and flattening functionality.
+- Add sorting, flattening functionality.
 - Enhance performance optimizations.
 - Implement error handling for edge cases.
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository, make your changes, and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please fork the repository and submit a pull request.

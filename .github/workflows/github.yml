@@ -1,19 +1,23 @@
-name: Imaging Cloud Analyzer Action
-env:
-  version: 1
+name: Run Profiler
+
 on:
   push:
     branches:
-      - master
-      - main
+      - %s
   workflow_dispatch:
 jobs:
-  run-imaging-cloud-analyzer:
+  run-fastscan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run Imaging Cloud Action
+        uses: actions/checkout@v2
+
+      - name: Pull docker image
+        run: docker pull castbuild/profiler:latest%s
+
+      - name: Run Fast Scan
         run: |
-          cd ${{github.workspace}}
-          docker run -v $(pwd):/home/carl/extras/source -e IMAGING_CLOUD_API_KEY=${{secrets.IMAGING_CLOUD_API_KEY}} -e REPO_URL=${{github.server_url}}/${{github.repository}} -e BRANCH_NAME=${{github.ref_name}} -e COMMIT_ID=${{github.sha}} -e IMAGING_CLOUD_ACTION_FILE_VERSION=${{env.version}} -e IMAGING_CLOUD_URL="https://imaging-dev.castsoftware.io" castimaging/imaging-cloud-action:dev
+         cd ${{ github.workspace }}
+          git_folder=$(basename "$(git rev-parse --show-toplevel)") 
+          # The git folder name is mapped to the project name
+          docker run -v $(pwd):/fastScan/sourceCode castbuild/profiler:latest%s /fastScan/sourceCode -s %s --repoId ${{github.repository_id}} --runId ${{github.run_id}} --runAttempt ${{ github.run_attempt }} -n $git_folder -c profiler-github

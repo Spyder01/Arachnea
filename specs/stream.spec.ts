@@ -203,6 +203,155 @@ describe('Testing stream', () => {
   });
 });
 
+describe('Testing map method specifically', () => {
+  const arr = [1, 2, 3, 4, 5];
+
+  it("should transform numbers to their squares", () => {
+    const result = stream(arr)
+      .map(x => x * x)
+      .collect();
+
+    expect(result).toEqual([1, 4, 9, 16, 25]);
+  });
+
+  it("should transform numbers to strings", () => {
+    const result = stream(arr)
+      .map(x => x.toString())
+      .collect();
+
+    expect(result).toEqual(['1', '2', '3', '4', '5']);
+  });
+
+  it("should transform numbers to objects", () => {
+    const result = stream(arr)
+      .map(x => ({ value: x, doubled: x * 2 }))
+      .collect();
+
+    expect(result).toEqual([
+      { value: 1, doubled: 2 },
+      { value: 2, doubled: 4 },
+      { value: 3, doubled: 6 },
+      { value: 4, doubled: 8 },
+      { value: 5, doubled: 10 }
+    ]);
+  });
+
+  it("should handle empty arrays", () => {
+    const result = stream([])
+      .map(x => x * 2)
+      .collect();
+
+    expect(result).toEqual([]);
+  });
+
+  it("should handle null and undefined values", () => {
+    const arrWithNulls = [1, null, 3, undefined, 5];
+    const result = stream(arrWithNulls)
+      .map(x => x === null ? 'null' : x === undefined ? 'undefined' : x)
+      .collect();
+
+    expect(result).toEqual([1, 'null', 3, 'undefined', 5]);
+  });
+
+  it("should chain multiple map operations", () => {
+    const result = stream(arr)
+      .map(x => x * 2)
+      .map(x => x + 1)
+      .map(x => x.toString())
+      .collect();
+
+    expect(result).toEqual(['3', '5', '7', '9', '11']);
+  });
+
+  it("should work with complex transformations", () => {
+    const words = ['hello', 'world', 'test'];
+    const result = stream(words)
+      .map(word => word.toUpperCase())
+      .map(word => word.split('').reverse().join(''))
+      .collect();
+
+    expect(result).toEqual(['OLLEH', 'DLROW', 'TSET']);
+  });
+
+  it("should work with transformation that doesn't need index", () => {
+    const result = stream(arr)
+      .map(x => ({ value: x, doubled: x * 2 }))
+      .collect();
+
+    expect(result).toEqual([
+      { value: 1, doubled: 2 },
+      { value: 2, doubled: 4 },
+      { value: 3, doubled: 6 },
+      { value: 4, doubled: 8 },
+      { value: 5, doubled: 10 }
+    ]);
+  });
+
+  it("should handle arrays with different data types", () => {
+    const mixedArray = [1, 'hello', true, { key: 'value' }, [1, 2, 3]];
+    const result = stream(mixedArray)
+      .map(x => typeof x)
+      .collect();
+
+    expect(result).toEqual(['number', 'string', 'boolean', 'object', 'object']);
+  });
+
+  it("should work with mathematical operations", () => {
+    const result = stream(arr)
+      .map(x => Math.pow(x, 3))
+      .collect();
+
+    expect(result).toEqual([1, 8, 27, 64, 125]);
+  });
+
+  it("should handle edge cases with zero and negative numbers", () => {
+    const edgeCases = [-2, -1, 0, 1, 2];
+    const result = stream(edgeCases)
+      .map(x => x * x)
+      .collect();
+
+    expect(result).toEqual([4, 1, 0, 1, 4]);
+  });
+
+  it("should work with boolean transformations", () => {
+    const result = stream(arr)
+      .map(x => x % 2 === 0)
+      .collect();
+
+    expect(result).toEqual([false, true, false, true, false]);
+  });
+
+  it("should handle function composition in map", () => {
+    const addOne = (x: number) => x + 1;
+    const multiplyByTwo = (x: number) => x * 2;
+    
+    const result = stream(arr)
+      .map(x => multiplyByTwo(addOne(x)))
+      .collect();
+
+    expect(result).toEqual([4, 6, 8, 10, 12]);
+  });
+
+  it("should work with array methods inside map", () => {
+    const arrayOfArrays = [[1, 2], [3, 4], [5, 6]];
+    const result = stream(arrayOfArrays)
+      .map(subArray => subArray.reduce((sum, num) => sum + num, 0))
+      .collect();
+
+    expect(result).toEqual([3, 7, 11]);
+  });
+
+  it("should handle large arrays efficiently", () => {
+    const largeArray = Array.from({ length: 1000 }, (_, i) => i + 1);
+    const result = stream(largeArray)
+      .map(x => x * 2)
+      .collect();
+
+    const expected = largeArray.map(x => x * 2);
+    expect(result).toEqual(expected);
+  });
+});
+
 describe('Benchmarking stream API vs. Array HOFs', () => {
   const arr = Array.from({ length: 1000000 }, (_, index) => index + 1); // Example large array
 

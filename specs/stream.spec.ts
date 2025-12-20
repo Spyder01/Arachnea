@@ -350,6 +350,48 @@ describe('Testing map method specifically', () => {
     const expected = largeArray.map(x => x * 2);
     expect(result).toEqual(expected);
   });
+
+  it("should propagate errors thrown in map function", () => {
+    expect(() => {
+      stream([1, 2, 3])
+        .map(x => {
+          if (x === 2) throw new Error('Test error');
+          return x * 2;
+        })
+        .collect();
+    }).toThrow('Test error');
+  });
+
+  it("should handle errors in chained map operations", () => {
+    expect(() => {
+      stream([1, 2, 3])
+        .map(x => x * 2)
+        .map(x => {
+          if (x === 4) throw new Error('Chain error');
+          return x + 1;
+        })
+        .collect();
+    }).toThrow('Chain error');
+  });
+
+  it("should handle map function that returns undefined", () => {
+    const result = stream([1, 2, 3])
+      .map(x => x === 2 ? undefined : x)
+      .collect();
+
+    expect(result).toEqual([1, undefined, 3]);
+  });
+
+  it("should handle map function with complex error scenarios", () => {
+    expect(() => {
+      stream(['a', 'b', 'c'])
+        .map(x => {
+          if (x === 'b') throw new TypeError('Invalid type');
+          return x.toUpperCase();
+        })
+        .collect();
+    }).toThrow('Invalid type');
+  });
 });
 
 describe('Benchmarking stream API vs. Array HOFs', () => {

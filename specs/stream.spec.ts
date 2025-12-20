@@ -273,18 +273,12 @@ describe('Testing map method specifically', () => {
     expect(result).toEqual(['OLLEH', 'DLROW', 'TSET']);
   });
 
-  it("should work with transformation that doesn't need index", () => {
+  it("should work with conditional transformations", () => {
     const result = stream(arr)
-      .map(x => ({ value: x, doubled: x * 2 }))
+      .map(x => x > 3 ? x * 10 : x)
       .collect();
 
-    expect(result).toEqual([
-      { value: 1, doubled: 2 },
-      { value: 2, doubled: 4 },
-      { value: 3, doubled: 6 },
-      { value: 4, doubled: 8 },
-      { value: 5, doubled: 10 }
-    ]);
+    expect(result).toEqual([1, 2, 3, 40, 50]);
   });
 
   it("should handle arrays with different data types", () => {

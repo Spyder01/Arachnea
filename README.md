@@ -99,13 +99,54 @@ console.log(oddNumbers); // Output: [1, 3, 5]
 
 ### Removing Elements
 
+The `remove` method allows you to remove the first element that matches a condition or equals a specific value.
+
+#### Remove by Value
 ```js
+const numbers = [1, 2, 3, 4, 5];
+
+// Remove the first occurrence of the number 3
+const withoutThree = arachnea(numbers)
+  .remove(3)
+  .collect();
+
+console.log(withoutThree); // Output: [1, 2, 4, 5]
+```
+
+#### Remove by Predicate Function
+```js
+// Remove the first even number
+const withoutFirstEven = arachnea(numbers)
+  .remove((num) => num % 2 === 0)
+  .collect();
+
+console.log(withoutFirstEven); // Output: [1, 3, 4, 5] (removed 2)
+
+// Remove the first number greater than 3
+const withoutFirstGreater = arachnea(numbers)
+  .remove((num) => num > 3)
+  .collect();
+
+console.log(withoutFirstGreater); // Output: [1, 2, 3, 5] (removed 4)
+```
+
+#### Chaining with Remove
+```js
+// Remove first even number, then square the remaining numbers
+const result = arachnea(numbers)
+  .remove((num) => num % 2 === 0)
+  .map((num) => num * num)
+  .collect();
+
+console.log(result); // Output: [1, 9, 16, 25] (removed 2, then squared)
+
+// Remove specific value after transformation
 const remove4 = arachnea(numbers)
   .map((num) => num * num)
   .remove(4)
   .collect();
 
-console.log(remove4); // Output: [1, 9, 16, 25]
+console.log(remove4); // Output: [1, 9, 16, 25] (squared first, then removed 4)
 ```
 
 ### Finding Elements
@@ -147,7 +188,35 @@ Reduces the array to a single value using the provided reducer and initial value
 
 ### `remove(condition: (element: T) => boolean | T): Stream<T>`
 
-Removes the first element in the array that meets the condition or equals the parameter.
+Removes the **first element** in the array that matches the condition or equals the parameter.
+
+**Parameters:**
+- `condition`: Either a predicate function `(element: T) => boolean` or a direct value `T` to match
+
+**Return Value:**
+- Returns a new `Stream<T>` with the first matching element removed
+- If no element matches, returns the original stream unchanged
+- **Important**: Only removes the **first** occurrence, not all matches
+
+**Behavior:**
+- ✅ **Chainable**: Can be followed by other stream operations
+- ✅ **Lazy**: Removal is applied during terminal operations (`collect()`, `reduce()`, etc.)
+- ✅ **Immutable**: Original array is not modified
+
+**Examples:**
+```js
+// Remove by direct value
+stream([1, 2, 3, 2, 4]).remove(2).collect()  // [1, 3, 2, 4] - only first 2 removed
+
+// Remove by predicate function  
+stream([1, 2, 3, 4]).remove(x => x > 2).collect()  // [1, 2, 4] - only first match (3) removed
+
+// Chaining after remove
+stream([1, 2, 3, 4])
+  .remove(2)           // Remove first 2: [1, 3, 4]
+  .map(x => x * 10)    // Transform: [10, 30, 40]
+  .collect()           // Result: [10, 30, 40]
+```
 
 ### `find(condition: (element: T) => boolean | T): T`
 
